@@ -6,7 +6,7 @@ import java.util.Scanner;
 /**
  * @author Justin Parker
  * Created On: 18/07/20
- * V. 1.2
+ * V. 1.25
  */
 public class Calculator {
 	
@@ -133,7 +133,7 @@ public class Calculator {
 	public static void PrintChances() {
 		UpdateChances();
 		for(int i = 0; i < Players.size(); i++)
-			System.out.println("Player "+i+" :  "+String.format("%"+(-longestNameLength)+"s", Players.get(i).getName())+" | "+String.format("%.2f", Chances.get(i))+"%");
+			System.out.println("Player "+(i+1)+" :  "+String.format("%"+(-longestNameLength)+"s", Players.get(i).getName())+" | "+String.format("%.2f", Chances.get(i))+"%");
 	}
 	
 	/**
@@ -163,7 +163,7 @@ public class Calculator {
 			String temp;
 			for(int i = 0; i < inNode; i++) {
 				while(true) {
-					System.out.print("\n"+(i+1)+") >> ");
+					System.out.print((i+1)+") >> ");
 					temp = scan.next();
 					if(NameToInt(temp) == -1)
 						System.out.println("\nInvalid name... Valid names are: "+getNames());
@@ -173,7 +173,7 @@ public class Calculator {
 				players.add(NameToInt(temp));
 			}
 			
-			System.out.print("\n\nWould you like to proceed with this information? (Yes / No)\n\n>> ");
+			System.out.print("\n\nWould you like to proceed with this information? (Yes / No)\n>> ");
 			boolean exit = false;
 			while(!exit)
 				switch(scan.next()) {
@@ -203,40 +203,20 @@ public class Calculator {
 			boolean exit = false;
 			String input;
 			while(!exit) {
-				System.out.print("\nEnter the name of the Player you would like to assume information about ('Reset' to reset everyone)\n\n>> ");
+				System.out.print("\nEnter the name of the Player you would like to assume information about ('Reset' to reset everyone)\n>> ");
 				input = scan.next();
 				if(input.equals("Reset")) {
-					System.out.print("\n\nWould you like to proceed with this information? (Yes / No)\n\n>> ");
-					switch(scan.next()) {
-					case "Yes":
-						for(int i = 0; i < Players.size(); i++)
-							Players.get(i).setBias(0.5);
-						exit = true;
-						break;
-					case "No":
-						exit = true;
-						break;
-					default:
-						System.out.print("\nNot a valid selection...\n\n");
-						break;
-					}
+					for(int i = 0; i < Players.size(); i++)
+						Players.get(i).setBias(0.5);
+					exit = true;
+					System.out.print("\nAll players bias was reset");
 				}
 				else if(getNames().contains(input)) {
-					System.out.print("\n\nHow much do you trust this person? (0 - 1, with 0 being Agent and 1 being Hacker)\n\n>> ");
+					System.out.print("\n\nHow much do you trust this person? (0 - 1, with 0 being Agent and 1 being Hacker)\n>> ");
 					double newBias = scan.nextDouble();
-					System.out.print("\n\nWould you like to proceed with this information? (Yes / No)\n\n>> ");
-					switch(scan.next()) {
-					case "Yes":
-							Players.get(NameToInt(input)).setBias(newBias);
-						exit = true;
-						break;
-					case "No":
-						exit = true;
-						break;
-					default:
-						System.out.print("\nNot a valid selection...\n\n");
-						break;
-					}
+					Players.get(NameToInt(input)).setBias(newBias);
+					exit = true;
+					System.out.print("\n"+input+"'s bias was set to: "+newBias);
 				}
 				else {
 					System.out.print("\nNot a valid selection...\n\n");

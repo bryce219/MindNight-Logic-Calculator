@@ -6,31 +6,41 @@ import java.util.Scanner;
 /**
  * @author Justin Parker
  * Created On: 18/07/20
- * V. 1.1
+ * V. 1.2
  */
 public class Calculator {
 	
 	static int numPlayers, numHackers, longestNameLength = 0;
-	static ArrayList<Player> Players;
-	static ArrayList<Instance> Instances;
-	static ArrayList<Double> Chances = new ArrayList<Double>();
+	static ArrayList<Player> Players; // arraylist of Player object
+	static ArrayList<Instance> Instances; // arraylist of Instance object
+	static ArrayList<Double> Chances = new ArrayList<Double>(); // arraylist of double, which are the chances each player being hacker
 	
+	/**
+	 * @param num
+	 * @return totalHackerInstances
+	 * Returns the number of instances in Instances that have player number 'num' as a hacker
+	 */
 	public static int GetTotalHackerInstances(int num) {
 		int totalHackerInstances = 0;
-		for(int i = 0; i < Instances.size(); i++)
-			if(Instances.get(i).getHackers().contains(num))
+		for(int i = 0; i < Instances.size(); i++) // run through all current instances
+			if(Instances.get(i).getHackers().contains(num)) // if one of the hackers is 'num', add one to totalHackerInstances
 				totalHackerInstances++;
 		return totalHackerInstances;
 	}
 	
+	/**
+	 * @param numHackers
+	 * @param numbers
+	 * Removes instances which are impossible (if there's not at least 'numHackers' hackers between the players in 'numbers')
+	 */
 	public static void RemoveInstances(int numHackers, ArrayList<Integer> numbers) {
 		int hackers;
-		for(int i = 0; i < Instances.size(); i++) {
+		for(int i = 0; i < Instances.size(); i++) { // run through all instances
 			hackers = 0;
-			for(int j = 0; j < numbers.size(); j++)
-				if(Instances.get(i).getHackers().contains(numbers.get(j)))
+			for(int j = 0; j < numbers.size(); j++) // run through all player numbers which must contain at lease 'numHackers' hackers
+				if(Instances.get(i).getHackers().contains(numbers.get(j))) // if one of the players is a hacker, add one to 'hackers'
 					hackers++;
-			if(hackers < numHackers) {
+			if(hackers < numHackers) { // if the total number of hackers found in the sample in that instance is less than what is required, that instance cannot exist
 				Instances.remove(i);
 				i--;
 			}
@@ -38,20 +48,22 @@ public class Calculator {
 		UpdateChances();
 	}
 	
+	/**
+	 * Updates 'Chances' to be used when displaying probabilities
+	 */
 	public static void UpdateChances() {
-		for(int i = 0; i < Instances.size(); i++) {
+		for(int i = 0; i < Instances.size(); i++) // updates the weight with respect to bias
 			Instances.get(i).updateWeight();
-		}
+		
 		double totalSum = 0;
-		for(int i = 0; i < Instances.size(); i++) {
+		for(int i = 0; i < Instances.size(); i++) // this is part 1/2 to normalize values, for percentages
 			totalSum += Instances.get(i).getWeight();
-		}
+		
 		totalSum = 1/totalSum;
-		for(int i = 0; i < Instances.size(); i++) {
+		for(int i = 0; i < Instances.size(); i++) // this is part 2/2 to normalize values, for percentages
 			Instances.get(i).setWeight(Instances.get(i).getWeight() * totalSum);
-		}
 
-		for(int i = 0; i < Chances.size(); i++) {
+		for(int i = 0; i < Chances.size(); i++) { // finally updates 'Chances' to be percent-compatable
 			totalSum = 0;
 			for(int j = 0; j < Instances.size(); j++) {
 				totalSum += Instances.get(j).getPlayerWeight(i);
@@ -60,36 +72,54 @@ public class Calculator {
 		}
 	}
 	
+	/**
+	 * @return Instances
+	 * Runs at the beginning of program, generates all possible Hacker-Agent configurations and puts them in 'Instances'
+	 */
 	public static ArrayList<Instance> GenerateInstances() {
 		ArrayList<Instance> Instances = new ArrayList<Instance>();
 		int totalOnes;
 		String encodedKey;
-		for(int i = 0; i < Math.pow(2, numPlayers); i++) { //generate all combos of 1|0 of length 'numPlayers'
+		for(int i = 0; i < Math.pow(2, numPlayers); i++) { // generate all combos of 1|0 of length 'numPlayers'
 			totalOnes = 0;
-			encodedKey = PadZeros(Integer.toBinaryString(i),numPlayers);
+			encodedKey = PadZeros(Integer.toBinaryString(i),numPlayers); // converts the number to binary
 			
-			for(int j = 0; j < numPlayers; j++)
+			for(int j = 0; j < numPlayers; j++) // adds up the ones
 				if(encodedKey.charAt(j)-'0' == 1)
 					totalOnes++;
 			
-			if(totalOnes == numHackers)
+			if(totalOnes == numHackers) // if total ones equals total number of hackers, it can be used as a valid instance
 				Instances.add(new Instance(encodedKey));
 		}
 		return Instances;
 	}
 	
+	/**
+	 * @param string
+	 * @param length
+	 * @return string
+	 * Adds '0' on the left of a string repeatedly until its 'length' long
+	 */
 	public static String PadZeros(String string, int length) {
 		while(string.length() < length)
 			string = "0" + string;
 		return string;
 	}
 	
+	/**
+	 * Run at the start of the program, adds 'numPlayers' elements to 'Chances'
+	 */
 	public static void InitializeChances() {
 		while(Chances.size() < numPlayers)
 			Chances.add(-1d);
 		UpdateChances();
 	}
 	
+	/**
+	 * @param name
+	 * @return i
+	 * Returns the player number within 'Players' whos name matches 'name'
+	 */
 	public static int NameToInt(String name) {
 		for(int i = 0; i < Players.size(); i++)
 			if(Players.get(i).getName().equals(name))
@@ -97,12 +127,19 @@ public class Calculator {
 		return -1;
 	}
 
+	/**
+	 * Prints 'Chances' in a visually readable way
+	 */
 	public static void PrintChances() {
 		UpdateChances();
 		for(int i = 0; i < Players.size(); i++)
 			System.out.println("Player "+i+" :  "+String.format("%"+(-longestNameLength)+"s", Players.get(i).getName())+" | "+String.format("%.2f", Chances.get(i))+"%");
 	}
 	
+	/**
+	 * @return names
+	 * Adds the names of all players within 'Players' to an arraylist and returns that
+	 */
 	public static ArrayList<String> getNames(){
 		ArrayList<String> names = new ArrayList<String>();
 		for(int i = 0; i < Players.size(); i++)
@@ -110,6 +147,10 @@ public class Calculator {
 		return names;
 	}
 	
+	/**
+	 * @param scan
+	 * Handles the sub-menu when the user selects <Logic>
+	 */
 	public static void LogicHandler(Scanner scan) {
 		int inNode,hackers;
 		try {
@@ -153,6 +194,10 @@ public class Calculator {
 		System.out.println("\n");
 	}
 	
+	/**
+	 * @param scan
+	 * Handles the sub-menu when the user selects <Assume>
+	 */
 	public static void AssumeHandler(Scanner scan) {
 		try {
 			boolean exit = false;
@@ -203,6 +248,10 @@ public class Calculator {
 		System.out.println("\n");
 		}
 	
+	/**
+	 * @param scan
+	 * The main menu
+	 */
 	public static void Menu(Scanner scan) {
 		boolean exit = false;
 		while(!exit) {
@@ -229,8 +278,11 @@ public class Calculator {
 		scan.close();
 	}
 	
-	public static void main(String[] args) {
-		Scanner scan = new Scanner(System.in);
+	/**
+	 * @param scan
+	 * Runs the code which is used before entering the menu
+	 */
+	public static void Start(Scanner scan) { 
 		
 		System.out.print("Welcome to Justin Parker's MINDNIGHT Logic Helper!\n\nPlease enter the number of players (5-8)\n>> ");
 		
@@ -285,5 +337,14 @@ public class Calculator {
 		*/
 		
 		scan.close();
+	}
+	
+	/**
+	 * @param args
+	 * The runner and initializer code
+	 */
+	public static void main(String[] args) {
+		Scanner scan = new Scanner(System.in);
+		Start(scan);
 	}
 }

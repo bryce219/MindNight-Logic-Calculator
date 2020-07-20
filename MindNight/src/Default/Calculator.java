@@ -6,7 +6,7 @@ import java.util.Scanner;
 /**
  * @author Justin Parker
  * Created On: 18/07/20
- * V. 1.25
+ * V. 1.3
  */
 public class Calculator {
 	
@@ -131,7 +131,6 @@ public class Calculator {
 	 * Prints 'Chances' in a visually readable way
 	 */
 	public static void PrintChances() {
-		UpdateChances();
 		for(int i = 0; i < Players.size(); i++)
 			System.out.println("Player "+(i+1)+" :  "+String.format("%"+(-longestNameLength)+"s", Players.get(i).getName())+" | "+String.format("%.2f", Chances.get(i))+"%");
 	}
@@ -145,6 +144,15 @@ public class Calculator {
 		for(int i = 0; i < Players.size(); i++)
 			names.add(Players.get(i).getName());
 		return names;
+	}
+	
+	public static void CorrectWrongAssumptions() {
+		if(Double.isNaN(Chances.get(0))) {
+			System.out.println("\nOne or more of your assumptions is wrong... Resetting assumptions.\n");
+			for(int i = 0; i < Players.size(); i++)
+				Players.get(i).setBias(0.5);
+			UpdateChances();
+		}
 	}
 	
 	/**
@@ -212,8 +220,17 @@ public class Calculator {
 					System.out.print("\nAll players bias was reset");
 				}
 				else if(getNames().contains(input)) {
-					System.out.print("\n\nHow much do you trust this person? (0 - 1, with 0 being Agent and 1 being Hacker)\n>> ");
-					double newBias = scan.nextDouble();
+					System.out.print("\n\nHow much do you trust this person? (decimal from 0 - 1, with 0 being Agent and 1 being Hacker)\n>> ");
+					boolean exit2 = false;
+					double newBias = -1;
+					while(!exit2) {
+						newBias = scan.nextDouble();
+						if(newBias >= 0 && newBias <= 1)
+							exit2 = true;
+						else
+							System.out.println("Please enter a decimal between 0 and 1");
+					}
+					
 					Players.get(NameToInt(input)).setBias(newBias);
 					exit = true;
 					System.out.print("\n"+input+"'s bias was set to: "+newBias);
@@ -234,7 +251,7 @@ public class Calculator {
 	 */
 	public static void Menu(Scanner scan) {
 		boolean exit = false;
-		while(!exit) {
+		while(!exit) {			
 			scan = new Scanner(System.in);
 			System.out.print("\n===================================\n"
 					+ "<Logic> - Use when a hacker was detected within a node.\n"
@@ -243,10 +260,14 @@ public class Calculator {
 			switch(scan.next()) {
 			case "Logic":
 				LogicHandler(scan);
+				UpdateChances();
+				CorrectWrongAssumptions();
 				PrintChances();
 				break;
 			case "Assume":
 				AssumeHandler(scan);
+				UpdateChances();
+				CorrectWrongAssumptions();
 				PrintChances();
 				break;
 			case "Exit":

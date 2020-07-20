@@ -146,6 +146,9 @@ public class Calculator {
 		return names;
 	}
 	
+	/**
+	 * Checks if the chances are NaN's, and resets assumptions based on this
+	 */
 	public static void CorrectWrongAssumptions() {
 		if(Double.isNaN(Chances.get(0))) {
 			System.out.println("\nOne or more of your assumptions is wrong... Resetting assumptions.\n");
@@ -160,7 +163,7 @@ public class Calculator {
 	 * Handles the sub-menu when the user selects <Logic>
 	 */
 	public static void LogicHandler(Scanner scan) {
-		int inNode,hackers;
+		int inNode, hackers;
 		try {
 			System.out.print("\n\nHow many Players were in the node?\n>> ");
 			inNode = scan.nextInt();
@@ -221,18 +224,16 @@ public class Calculator {
 				}
 				else if(getNames().contains(input)) {
 					System.out.print("\n\nHow much do you trust this person? (decimal from 0 - 1, with 0 being Agent and 1 being Hacker)\n>> ");
-					boolean exit2 = false;
 					double newBias = -1;
-					while(!exit2) {
+					while(!exit) {
 						newBias = scan.nextDouble();
 						if(newBias >= 0 && newBias <= 1)
-							exit2 = true;
+							exit = true;
 						else
-							System.out.println("Please enter a decimal between 0 and 1");
+							System.out.print("\nPlease enter a decimal between 0 and 1\n>> ");
 					}
 					
 					Players.get(NameToInt(input)).setBias(newBias);
-					exit = true;
 					System.out.print("\n"+input+"'s bias was set to: "+newBias);
 				}
 				else {

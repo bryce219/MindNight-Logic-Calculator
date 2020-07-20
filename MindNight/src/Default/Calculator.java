@@ -6,7 +6,7 @@ import java.util.Scanner;
 /**
  * @author Justin Parker
  * Created On: 18/07/20
- * V. 1.3
+ * V. 1.32
  */
 public class Calculator {
 	
@@ -164,6 +164,7 @@ public class Calculator {
 	 */
 	public static void LogicHandler(Scanner scan) {
 		int inNode, hackers;
+		boolean exit = false;
 		try {
 			System.out.print("\n\nHow many Players were in the node?\n>> ");
 			inNode = scan.nextInt();
@@ -171,21 +172,21 @@ public class Calculator {
 			hackers = scan.nextInt();
 			System.out.println("\nPlease type the names of the "+inNode+" Players that were the node...");
 			ArrayList<Integer> players = new ArrayList<Integer>();
-			String temp;
+			String temp = "";
 			for(int i = 0; i < inNode; i++) {
-				while(true) {
+				while(!exit) {
 					System.out.print((i+1)+") >> ");
 					temp = scan.next();
 					if(NameToInt(temp) == -1)
 						System.out.println("\nInvalid name... Valid names are: "+getNames());
 					else
-						break;
+						exit = true;
 				}
 				players.add(NameToInt(temp));
 			}
 			
 			System.out.print("\n\nWould you like to proceed with this information? (Yes / No)\n>> ");
-			boolean exit = false;
+			exit = false;
 			while(!exit)
 				switch(scan.next()) {
 				case "Yes":
@@ -217,7 +218,7 @@ public class Calculator {
 				System.out.print("\nEnter the name of the Player you would like to assume information about ('Reset' to reset everyone)\n>> ");
 				input = scan.next();
 				if(input.equals("Reset")) {
-					for(int i = 0; i < Players.size(); i++)
+					for(int i = 0; i < Players.size(); i++) // reset all players biases
 						Players.get(i).setBias(0.5);
 					exit = true;
 					System.out.print("\nAll players bias was reset");
@@ -297,13 +298,13 @@ public class Calculator {
 				System.exit(0);
 			}
 			
-			if(numPlayers < 5 || numPlayers > 8)
+			if(numPlayers < 5 || numPlayers > 8) // number of mindnight players must be between 5 and 8
 				System.out.print("\nInvalid number of players...\n>> ");
 			else
 				exit = true;
 		}
 		
-		numHackers = (int)Math.floor((double)(numPlayers-1)/2);
+		numHackers = (int)Math.floor((double)(numPlayers-1)/2); //hackers-based-on-players equation
 		Players = new ArrayList<Player>();
 		System.out.println("\nThere are "+numHackers+" Hackers and "+(numPlayers-numHackers)+" Agents.  Please enter...");
 		

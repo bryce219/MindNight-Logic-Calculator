@@ -174,13 +174,13 @@ public class Calculator {
 			ArrayList<Integer> players = new ArrayList<Integer>();
 			String temp = "";
 			for(int i = 0; i < inNode; i++) {
-				while(!exit) {
+				while(true) {
 					System.out.print((i+1)+") >> ");
 					temp = scan.next();
 					if(NameToInt(temp) == -1)
 						System.out.println("\nInvalid name... Valid names are: "+getNames());
 					else
-						exit = true;
+						break;
 				}
 				players.add(NameToInt(temp));
 			}

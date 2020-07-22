@@ -10,10 +10,11 @@ import java.util.Scanner;
  */
 public class Calculator {
 	
-	static int numPlayers, numHackers, longestNameLength = 0;
+	static int numPlayers, numHackers, longestNameLength = 0, nodeNum = 1, hackedNodes = 0;
 	static ArrayList<Player> Players; // arraylist of Player object
 	static ArrayList<Instance> Instances; // arraylist of Instance object
 	static ArrayList<Double> Chances = new ArrayList<Double>(); // arraylist of double, which are the chances each player being hacker
+	static ArrayList<Node> History = new ArrayList<Node>();
 	
 	/**
 	 * @param num
@@ -117,7 +118,7 @@ public class Calculator {
 	
 	/**
 	 * @param name
-	 * @return i
+	 * @return Player Number
 	 * Returns the player number within 'Players' whos name matches 'name'
 	 */
 	public static int NameToInt(String name) {
@@ -128,11 +129,44 @@ public class Calculator {
 	}
 
 	/**
+	 * @param name
+	 * @return Player
+	 * Returns the Player within 'Players' whos name matches 'name'
+	 */
+	public static Player NameToPlayer(String name) {
+		for(int i = 0; i < Players.size(); i++)
+			if(Players.get(i).getName().equals(name))
+				return Players.get(i);
+		return new Player(-1,"-1");
+	}
+	
+	/**
 	 * Prints 'Chances' in a visually readable way
 	 */
 	public static void PrintChances() {
 		for(int i = 0; i < Players.size(); i++)
 			System.out.println("Player "+(i+1)+" :  "+String.format("%"+(-longestNameLength)+"s", Players.get(i).getName())+" | "+String.format("%.2f", Chances.get(i))+"%");
+		System.out.print("\nNode #"+nodeNum);
+	}
+	
+	/**
+	 * Prints the node history of the game
+	 */
+	public static void PrintInfo() {
+		System.out.println();
+		for(int i = 0; i < History.size(); i++) {
+			System.out.print("Node #"+(i+1)+": ");
+			if(History.get(i).getNumHackers() >= 1)
+				System.out.print("Hacked - ");
+			else if(History.get(i).getNumHackers() == 0)
+				System.out.print("Secured - ");
+			System.out.println(History.get(i).getNumHackers()+" Hacker(s)");
+			for(int j = 0; j < History.get(i).getPlayers().size(); j++)
+				System.out.println("	- "+History.get(i).getPlayers().get(j).getName());
+		}
+		if(History.size() == 0)
+			System.out.println("\nNo game history to display...");
+		System.out.println();
 	}
 	
 	/**
@@ -162,7 +196,7 @@ public class Calculator {
 	 * @param scan
 	 * Handles the sub-menu when the user selects <Logic>
 	 */
-	public static void LogicHandler(Scanner scan) {
+	public static void NodeHandler(Scanner scan) {
 		int inNode, hackers;
 		boolean exit = false;
 		try {
@@ -171,26 +205,34 @@ public class Calculator {
 			System.out.print("\nHow many Hackers were in the node?\n>> ");
 			hackers = scan.nextInt();
 			System.out.println("\nPlease type the names of the "+inNode+" Players that were the node...");
-			ArrayList<Integer> players = new ArrayList<Integer>();
+			ArrayList<Integer> playerNums = new ArrayList<Integer>();
+			ArrayList<Player> players = new ArrayList<Player>();
 			String temp = "";
 			for(int i = 0; i < inNode; i++) {
 				while(true) {
 					System.out.print((i+1)+") >> ");
 					temp = scan.next();
+					players.add(NameToPlayer(temp));
 					if(NameToInt(temp) == -1)
 						System.out.println("\nInvalid name... Valid names are: "+getNames());
 					else
 						break;
 				}
-				players.add(NameToInt(temp));
+				playerNums.add(NameToInt(temp));
 			}
-			
 			System.out.print("\n\nWould you like to proceed with this information? (Yes / No)\n>> ");
 			exit = false;
 			while(!exit)
 				switch(scan.next()) {
 				case "Yes":
-					RemoveInstances(hackers,players);
+					if(hackers >= 1) {
+						RemoveInstances(hackers,playerNums);
+						hackedNodes++;
+					}
+					else if (hackers == 0) {
+					}
+					History.add(new Node(players,hackers));
+					nodeNum++;
 					exit = true;
 					break;
 				case "No":
@@ -199,7 +241,7 @@ public class Calculator {
 				default:
 					System.out.print("\nNot a valid selection...\n\n>> ");
 					break;
-				}
+			}
 		}catch(Exception e) {
 			System.out.println("\nThere was an error... Returning you to the main menu");
 		}
@@ -256,12 +298,13 @@ public class Calculator {
 		while(!exit) {			
 			scan = new Scanner(System.in);
 			System.out.print("\n===================================\n"
-					+ "<Logic> - Use when a hacker was detected within a node.\n"
+					+ "<Node> - Use when a node has proceeded.\n"
 					+ "<Assume> - Use to set your trust with a player\n"
+					+ "<Info> - Use to see all game information\n"
 					+ "<Exit> - Exit the program.\n\n>> ");
 			switch(scan.next()) {
-			case "Logic":
-				LogicHandler(scan);
+			case "Node":
+				NodeHandler(scan);
 				UpdateChances();
 				CorrectWrongAssumptions();
 				PrintChances();
@@ -270,6 +313,10 @@ public class Calculator {
 				AssumeHandler(scan);
 				UpdateChances();
 				CorrectWrongAssumptions();
+				PrintChances();
+				break;
+			case "Info":		
+				PrintInfo();
 				PrintChances();
 				break;
 			case "Exit":

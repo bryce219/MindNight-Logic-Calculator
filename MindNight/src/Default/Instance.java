@@ -57,7 +57,7 @@ public class Instance extends Calculator{
 		weight = 1;
 		double temp;
 		for(int i = 0; i < key.length; i++) {
-			temp = key[i] ? 1 : 0;
+			temp = key[i] ? 0.99999999 : 0.00000001;
 			weight *= Math.abs(Players.get(i).getBias() + temp - 1d);
 		}
 	}
@@ -80,7 +80,7 @@ public class Instance extends Calculator{
 	 * returns 0 if player in this instance isn't a hacker, and 'player' if they are one 
 	 */
 	public double getPlayerWeight(int player) {
-		double temp = key[player] ? 1 : 0;
+		double temp = key[player] ? 0.99999999 : 0.00000001;
 		return temp * weight;
 	}
 }

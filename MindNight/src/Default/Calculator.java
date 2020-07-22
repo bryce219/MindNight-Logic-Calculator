@@ -6,15 +6,18 @@ import java.util.Scanner;
 /**
  * @author Justin Parker
  * Created On: 18/07/20
- * V. 1.32
+ * V. 2.0
  */
 public class Calculator {
 	
-	static int numPlayers, numHackers, longestNameLength = 0, nodeNum = 1, hackedNodes = 0;
+	static int numPlayers, numHackers, longestNameLength = 0, nodeNum = 1, hackedNodes = 0, securedNodes = 0;
 	static ArrayList<Player> Players; // arraylist of Player object
 	static ArrayList<Instance> Instances; // arraylist of Instance object
 	static ArrayList<Double> Chances = new ArrayList<Double>(); // arraylist of double, which are the chances each player being hacker
 	static ArrayList<Node> History = new ArrayList<Node>();
+	
+	static boolean secureNodeHuristic = false;
+	static double n1 = 0.0, n2 = 0.08, n3 = 0.12, n4 = 0.15;
 	
 	/**
 	 * @param num
@@ -72,103 +75,7 @@ public class Calculator {
 			Chances.set(i, 100*totalSum);
 		}
 	}
-	
-	/**
-	 * @return Instances
-	 * Runs at the beginning of program, generates all possible Hacker-Agent configurations and puts them in 'Instances'
-	 */
-	public static ArrayList<Instance> GenerateInstances() {
-		ArrayList<Instance> Instances = new ArrayList<Instance>();
-		int totalOnes;
-		String encodedKey;
-		for(int i = 0; i < Math.pow(2, numPlayers); i++) { // generate all combos of 1|0 of length 'numPlayers'
-			totalOnes = 0;
-			encodedKey = PadZeros(Integer.toBinaryString(i),numPlayers); // converts the number to binary
-			
-			for(int j = 0; j < numPlayers; j++) // adds up the ones
-				if(encodedKey.charAt(j)-'0' == 1)
-					totalOnes++;
-			
-			if(totalOnes == numHackers) // if total ones equals total number of hackers, it can be used as a valid instance
-				Instances.add(new Instance(encodedKey));
-		}
-		return Instances;
-	}
-	
-	/**
-	 * @param string
-	 * @param length
-	 * @return string
-	 * Adds '0' on the left of a string repeatedly until its 'length' long
-	 */
-	public static String PadZeros(String string, int length) {
-		while(string.length() < length)
-			string = "0" + string;
-		return string;
-	}
-	
-	/**
-	 * Run at the start of the program, adds 'numPlayers' elements to 'Chances'
-	 */
-	public static void InitializeChances() {
-		while(Chances.size() < numPlayers)
-			Chances.add(-1d);
-		UpdateChances();
-	}
-	
-	/**
-	 * @param name
-	 * @return Player Number
-	 * Returns the player number within 'Players' whos name matches 'name'
-	 */
-	public static int NameToInt(String name) {
-		for(int i = 0; i < Players.size(); i++)
-			if(Players.get(i).getName().equals(name))
-				return i;
-		return -1;
-	}
 
-	/**
-	 * @param name
-	 * @return Player
-	 * Returns the Player within 'Players' whos name matches 'name'
-	 */
-	public static Player NameToPlayer(String name) {
-		for(int i = 0; i < Players.size(); i++)
-			if(Players.get(i).getName().equals(name))
-				return Players.get(i);
-		return new Player(-1,"-1");
-	}
-	
-	/**
-	 * Prints 'Chances' in a visually readable way
-	 */
-	public static void PrintChances() {
-		for(int i = 0; i < Players.size(); i++)
-			System.out.println("Player "+(i+1)+" :  "+String.format("%"+(-longestNameLength)+"s", Players.get(i).getName())+" | "+String.format("%.2f", Chances.get(i))+"%");
-		System.out.print("\nNode #"+nodeNum);
-	}
-	
-	/**
-	 * Prints the node history of the game
-	 */
-	public static void PrintInfo() {
-		System.out.println();
-		for(int i = 0; i < History.size(); i++) {
-			System.out.print("Node #"+(i+1)+": ");
-			if(History.get(i).getNumHackers() >= 1)
-				System.out.print("Hacked - ");
-			else if(History.get(i).getNumHackers() == 0)
-				System.out.print("Secured - ");
-			System.out.println(History.get(i).getNumHackers()+" Hacker(s)");
-			for(int j = 0; j < History.get(i).getPlayers().size(); j++)
-				System.out.println("	- "+History.get(i).getPlayers().get(j).getName());
-		}
-		if(History.size() == 0)
-			System.out.println("\nNo game history to display...");
-		System.out.println();
-	}
-	
 	/**
 	 * @return names
 	 * Adds the names of all players within 'Players' to an arraylist and returns that
@@ -178,18 +85,6 @@ public class Calculator {
 		for(int i = 0; i < Players.size(); i++)
 			names.add(Players.get(i).getName());
 		return names;
-	}
-	
-	/**
-	 * Checks if the chances are NaN's, and resets assumptions based on this
-	 */
-	public static void CorrectWrongAssumptions() {
-		if(Double.isNaN(Chances.get(0))) {
-			System.out.println("\nOne or more of your assumptions is wrong... Resetting assumptions.\n");
-			for(int i = 0; i < Players.size(); i++)
-				Players.get(i).setBias(0.5);
-			UpdateChances();
-		}
 	}
 	
 	/**
@@ -212,13 +107,14 @@ public class Calculator {
 				while(true) {
 					System.out.print((i+1)+") >> ");
 					temp = scan.next();
-					players.add(NameToPlayer(temp));
-					if(NameToInt(temp) == -1)
+					players.add(Misc.NameToPlayer(temp));
+					if(Misc.NameToInt(temp) == -1)
 						System.out.println("\nInvalid name... Valid names are: "+getNames());
 					else
 						break;
 				}
-				playerNums.add(NameToInt(temp));
+				playerNums.add(Misc.NameToInt(temp));
+				players.add(Misc.NameToPlayer(temp));
 			}
 			System.out.print("\n\nWould you like to proceed with this information? (Yes / No)\n>> ");
 			exit = false;
@@ -227,9 +123,19 @@ public class Calculator {
 				case "Yes":
 					if(hackers >= 1) {
 						RemoveInstances(hackers,playerNums);
+						if(hackedNodes >= 2 || securedNodes >= 2)
+							for(Player player: players) {
+								player.addBias(Misc.CalculateRelationFactor());
+								player.returnBiasToRange();
+							}
 						hackedNodes++;
 					}
 					else if (hackers == 0) {
+						for(Player player: players) {
+							player.addBias(-Misc.CalculateRelationFactor());
+							player.returnBiasToRange();
+						}
+						securedNodes++;
 					}
 					History.add(new Node(players,hackers));
 					nodeNum++;
@@ -276,7 +182,7 @@ public class Calculator {
 							System.out.print("\nPlease enter a decimal between 0 and 1\n>> ");
 					}
 					
-					Players.get(NameToInt(input)).setBias(newBias);
+					Players.get(Misc.NameToInt(input)).setBias(newBias);
 					System.out.print("\n"+input+"'s bias was set to: "+newBias);
 				}
 				else {
@@ -306,18 +212,16 @@ public class Calculator {
 			case "Node":
 				NodeHandler(scan);
 				UpdateChances();
-				CorrectWrongAssumptions();
-				PrintChances();
+				Misc.PrintChances();
 				break;
 			case "Assume":
 				AssumeHandler(scan);
 				UpdateChances();
-				CorrectWrongAssumptions();
-				PrintChances();
+				Misc.PrintChances();
 				break;
 			case "Info":		
-				PrintInfo();
-				PrintChances();
+				Misc.PrintInfo();
+				Misc.PrintChances();
 				break;
 			case "Exit":
 				exit = true;
@@ -333,6 +237,10 @@ public class Calculator {
 	 * Runs the code which is used before entering the menu
 	 */
 	public static void Start(Scanner scan) { 
+		
+		if(!secureNodeHuristic) {
+			Misc.n1 = Misc.n2 = Misc.n3 = Misc.n4 = 0;
+		}
 		
 		System.out.print("Welcome to Justin Parker's MINDNIGHT Logic Helper!\n\nPlease enter the number of players (5-8)\n>> ");
 		
@@ -364,10 +272,10 @@ public class Calculator {
 			if(longestNameLength < Players.get(i).getName().length())
 				longestNameLength = Players.get(i).getName().length();
 		
-		Instances = GenerateInstances();
-		InitializeChances();
+		Instances = Misc.GenerateInstances();
+		Misc.InitializeChances();
 		System.out.println();
-		PrintChances();
+		Misc.PrintChances();
 		Menu(scan);
 		
 		/*

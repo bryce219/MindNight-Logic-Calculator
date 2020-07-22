@@ -39,4 +39,20 @@ public class Player extends Calculator{
 	 * sets the bias of the player
 	 */
 	public void setBias(double bias) { this.bias = bias; }
+	
+	/**
+	 * @param bias
+	 * adds to the bias of the player
+	 */
+	public void addBias(double bias) {this.bias += bias; }
+	
+	/**
+	 * if the bias is outside of the 0-1 range, return it
+	 */
+	public void returnBiasToRange() {
+		if(this.bias < 0)
+			this.bias = 0;
+		else if(this.bias > 1)
+			this.bias = 1;
+	}
 }

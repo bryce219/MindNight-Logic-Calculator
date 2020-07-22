@@ -16,7 +16,7 @@ public class Calculator {
 	static ArrayList<Double> Chances = new ArrayList<Double>(); // arraylist of double, which are the chances each player being hacker
 	static ArrayList<Node> History = new ArrayList<Node>();
 	
-	static boolean secureNodeHuristic = false;
+	static boolean secureNodeHeuristic = false;
 	static double n1 = 0.0, n2 = 0.08, n3 = 0.12, n4 = 0.15;
 	
 	/**
@@ -238,7 +238,7 @@ public class Calculator {
 	 */
 	public static void Start(Scanner scan) { 
 		
-		if(!secureNodeHuristic) {
+		if(!secureNodeHeuristic) {
 			Misc.n1 = Misc.n2 = Misc.n3 = Misc.n4 = 0;
 		}
 		

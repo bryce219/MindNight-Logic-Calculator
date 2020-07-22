@@ -11,8 +11,8 @@ import java.util.Scanner;
 public class Calculator {
 	
 	static int numPlayers, numHackers, longestNameLength = 0, nodeNum = 1, hackedNodes = 0, securedNodes = 0;
-	static ArrayList<Player> Players; // arraylist of Player object
-	static ArrayList<Instance> Instances; // arraylist of Instance object
+	static ArrayList<Player> Players;
+	static ArrayList<Instance> Instances;
 	static ArrayList<Double> Chances = new ArrayList<Double>(); // arraylist of double, which are the chances each player being hacker
 	static ArrayList<Node> History = new ArrayList<Node>();
 	
@@ -123,19 +123,24 @@ public class Calculator {
 				case "Yes":
 					if(hackers >= 1) {
 						RemoveInstances(hackers,playerNums);
-						if(hackedNodes >= 2 || securedNodes >= 2)
+						/*if(hackedNodes >= 2)
 							for(Player player: players) {
+								System.out.println("A");
 								player.addBias(Misc.CalculateRelationFactor());
+								System.out.println("B");
 								player.returnBiasToRange();
+								System.out.println(player.getBias());
 							}
-						hackedNodes++;
+						hackedNodes++;*/
 					}
 					else if (hackers == 0) {
-						for(Player player: players) {
-							player.addBias(-Misc.CalculateRelationFactor());
-							player.returnBiasToRange();
-						}
-						securedNodes++;
+						/*if(securedNodes >= 2)
+							for(Player player: players) {
+								player.addBias(-Misc.CalculateRelationFactor());
+								player.returnBiasToRange();
+								System.out.println(player.getBias());
+							}
+						securedNodes++;*/
 					}
 					History.add(new Node(players,hackers));
 					nodeNum++;

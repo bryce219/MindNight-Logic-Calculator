@@ -107,7 +107,6 @@ public class Calculator {
 				while(true) {
 					System.out.print((i+1)+") >> ");
 					temp = scan.next();
-					players.add(Misc.NameToPlayer(temp));
 					if(Misc.NameToInt(temp) == -1)
 						System.out.println("\nInvalid name... Valid names are: "+getNames());
 					else

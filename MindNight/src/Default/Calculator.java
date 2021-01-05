@@ -10,14 +10,11 @@ import java.util.Scanner;
  */
 public class Calculator {
 	
-	static int numPlayers, numHackers, longestNameLength = 0, nodeNum = 1, hackedNodes = 0, securedNodes = 0;
+	static int numPlayers, numHackers, longestNameLength = 0, nodeNum = 1;
 	static ArrayList<Player> Players;
 	static ArrayList<Instance> Instances;
 	static ArrayList<Double> Chances = new ArrayList<Double>(); // arraylist of double, which are the chances each player being hacker
 	static ArrayList<Node> History = new ArrayList<Node>();
-	
-	static boolean secureNodeHeuristic = false;
-	static double n1 = 0.0, n2 = 0.08, n3 = 0.12, n4 = 0.15;
 	
 	/**
 	 * @param num
@@ -87,9 +84,24 @@ public class Calculator {
 		return names;
 	}
 	
+	public static void setAssumption(int playerNum, double biasValue) {
+		Players.get(playerNum).setBias(biasValue);
+	}
+	
+	public static void resetAssumption() {
+		for(Player player: Players)
+			player.setBias(0.5);
+	}
+	
+	public static void setNode(ArrayList<Integer> playerNums, int numHackers) {
+		RemoveInstances(numHackers,playerNums);
+		//History.add(new Node(playerNums,numHackers));
+		nodeNum++;
+	}
+	
 	/**
 	 * @param scan
-	 * Handles the sub-menu when the user selects <Logic>
+	 * Handles the sub-menu when the user selects <Node>
 	 */
 	public static void NodeHandler(Scanner scan) {
 		int inNode, hackers;
@@ -120,27 +132,7 @@ public class Calculator {
 			while(!exit)
 				switch(scan.next()) {
 				case "Yes":
-					if(hackers >= 1) {
-						RemoveInstances(hackers,playerNums);
-						/*if(hackedNodes >= 2)
-							for(Player player: players) {
-								System.out.println("A");
-								player.addBias(Misc.CalculateRelationFactor());
-								System.out.println("B");
-								player.returnBiasToRange();
-								System.out.println(player.getBias());
-							}
-						hackedNodes++;*/
-					}
-					else if (hackers == 0) {
-						/*if(securedNodes >= 2)
-							for(Player player: players) {
-								player.addBias(-Misc.CalculateRelationFactor());
-								player.returnBiasToRange();
-								System.out.println(player.getBias());
-							}
-						securedNodes++;*/
-					}
+					RemoveInstances(hackers,playerNums);
 					History.add(new Node(players,hackers));
 					nodeNum++;
 					exit = true;
@@ -183,7 +175,7 @@ public class Calculator {
 						if(newBias >= 0 && newBias <= 1)
 							exit = true;
 						else
-							System.out.print("\nPlease enter a decimal between 0 and 1\n>> ");
+							System.out.print("\nPlease enter a decimal between 0 and 1 inclusive\n>> ");
 					}
 					
 					Players.get(Misc.NameToInt(input)).setBias(newBias);
@@ -197,7 +189,57 @@ public class Calculator {
 			System.out.println("\nThere was an error... Returning you to the main menu");
 		}
 		System.out.println("\n");
+	}
+	
+	/**
+	 * @param scan
+	 * Handles the sub-menu when the user selects <Logic>
+	 */
+	public static void LogicHandler(Scanner scan) {
+		boolean exit = false;
+		try {
+			while(!exit) {	
+				System.out.print("\nEnter 'Simulate' for node simulation, or 'Best' for the best node option\n>> ");
+				switch(scan.next()) {
+				case "Simulate":
+					exit = true;
+					System.out.print("\nEnter the number of players in the simulation\n>>");
+					int numPlayersInSim = scan.nextInt();
+					System.out.print("\nEnter the names of the " + numPlayersInSim + " players\n");
+					ArrayList<Integer> playerNums = new ArrayList<Integer>();
+					ArrayList<Player> players = new ArrayList<Player>();
+					String temp = "";
+					for(int i = 0; i < numPlayersInSim; i++) {
+						while(true) {
+							System.out.print((i+1)+") >> ");
+							temp = scan.next();
+							if(Misc.NameToInt(temp) == -1)
+								System.out.println("\nInvalid name... Valid names are: "+getNames());
+							else
+								break;
+						}
+						playerNums.add(Misc.NameToInt(temp));
+						players.add(Misc.NameToPlayer(temp));
+					}
+					double chanceOfHacker = 0;
+					for(Instance instance : Instances)
+						chanceOfHacker += instance.containsHacker(playerNums) ? instance.weight : 0;
+					System.out.println("\nChance of at least 1 hacker among these players: "+String.format("%.2f", chanceOfHacker*100)+"%");
+					break;
+				case "Best":
+					exit = true;
+					System.out.print("Not implemented! Sucks to be you!");
+				default:
+					System.out.print("Invalid input... Returning you to the main menu");
+					exit = true;
+					break;
+				}
+			}
+		}catch(Exception e) {
+			System.out.println("\nThere was an error... Returning you to the main menu");
 		}
+		System.out.println("\n");
+	}
 	
 	/**
 	 * @param scan
@@ -211,6 +253,7 @@ public class Calculator {
 					+ "<Node> - Use when a node has proceeded.\n"
 					+ "<Assume> - Use to set your trust with a player\n"
 					+ "<Info> - Use to see all game information\n"
+					+ "<Logic> - Use to see the in node stats\n"
 					+ "<Exit> - Exit the program.\n\n>> ");
 			switch(scan.next()) {
 			case "Node":
@@ -227,6 +270,10 @@ public class Calculator {
 				Misc.PrintInfo();
 				Misc.PrintChances();
 				break;
+			case "Logic":
+				LogicHandler(scan);
+				Misc.PrintChances();
+				break;
 			case "Exit":
 				exit = true;
 				System.out.print("\n\nThanks for using me!");
@@ -241,10 +288,6 @@ public class Calculator {
 	 * Runs the code which is used before entering the menu
 	 */
 	public static void Start(Scanner scan) { 
-		
-		if(!secureNodeHeuristic) {
-			Misc.n1 = Misc.n2 = Misc.n3 = Misc.n4 = 0;
-		}
 		
 		System.out.print("Welcome to Justin Parker's MINDNIGHT Logic Helper!\n\nPlease enter the number of players (5-8)\n>> ");
 		
@@ -272,7 +315,7 @@ public class Calculator {
 			Players.add(new Player(i,scan.next()));
 		}
 		
-		for(int i = 0; i < Players.size(); i++)
+		for(int i = 0; i < Players.size(); i++) //get longest name length to make GUI visually appealing
 			if(longestNameLength < Players.get(i).getName().length())
 				longestNameLength = Players.get(i).getName().length();
 		
@@ -307,6 +350,7 @@ public class Calculator {
 	 */
 	public static void main(String[] args) {
 		Scanner scan = new Scanner(System.in);
+		//Calculator calc = new Calculator();
 		Start(scan);
 	}
 }

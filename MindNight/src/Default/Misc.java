@@ -104,30 +104,4 @@ public class Misc extends Calculator{
 			System.out.println("\nNo game history to display...");
 		System.out.println();
 	}
-	
-	/**
-	 * @return relationFactor
-	 * Returns the incentive factor for hackers to hack
-	 */
-	public static double CalculateRelationFactor() {
-		if(hackedNodes >= 2 || securedNodes >= 2)
-			return 1;
-		else
-			switch(nodeNum) {
-			case 1:
-				return n1;
-			case 2:
-				return n2;
-			case 3:
-				return n3;
-			case 4:
-				return n4;
-			}
-		return 0;
-		
-	}
-	
-	public static void UseRelationFactor(double relationFactor) {
-		
-	}
 }

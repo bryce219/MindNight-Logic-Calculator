@@ -2,6 +2,11 @@ package Default;
 
 import java.util.ArrayList;
 
+/**
+ * @author Justin Parker
+ * Created On: 22/07/20
+ * V. 2.2
+ */
 public class Node {
 
 	static int[][] nodeCounts = {
@@ -21,12 +26,25 @@ public class Node {
 	ArrayList<Player> players;
 	int hackers;
 	
+	/**
+	 * @param players
+	 * @param hackers
+	 * constructor for Node
+	 */
 	public Node(ArrayList<Player> players, int hackers) {
 		this.players = players;
 		this.hackers = hackers;
 	}
 	
+	/**
+	 * @return hackers
+	 * returns the number of hackers the node
+	 */
 	public int getNumHackers() { return hackers; }
 	
+	/**
+	 * @return players
+	 * returns the number of players the node
+	 */
 	public ArrayList<Player> getPlayers() { return players; }
 }

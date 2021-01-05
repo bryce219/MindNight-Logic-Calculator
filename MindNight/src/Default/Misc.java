@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * @author Justin Parker
  * Created On: 22/07/20
- * V. 1.0
+ * V. 2.2
  */
 public class Misc extends Calculator{
 	

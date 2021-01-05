@@ -6,7 +6,7 @@ import java.util.Scanner;
 /**
  * @author Justin Parker
  * Created On: 18/07/20
- * V. 2.0
+ * V. 2.2
  */
 public class Calculator {
 	
@@ -82,21 +82,6 @@ public class Calculator {
 		for(int i = 0; i < Players.size(); i++)
 			names.add(Players.get(i).getName());
 		return names;
-	}
-	
-	public static void setAssumption(int playerNum, double biasValue) {
-		Players.get(playerNum).setBias(biasValue);
-	}
-	
-	public static void resetAssumption() {
-		for(Player player: Players)
-			player.setBias(0.5);
-	}
-	
-	public static void setNode(ArrayList<Integer> playerNums, int numHackers) {
-		RemoveInstances(numHackers,playerNums);
-		//History.add(new Node(playerNums,numHackers));
-		nodeNum++;
 	}
 	
 	/**
@@ -228,7 +213,7 @@ public class Calculator {
 					break;
 				case "Best":
 					exit = true;
-					System.out.print("Not implemented! Sucks to be you!");
+					System.out.print("\nNot implemented! Sucks to be you!");
 				default:
 					System.out.print("Invalid input... Returning you to the main menu");
 					exit = true;
